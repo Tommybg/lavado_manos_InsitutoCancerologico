@@ -7,8 +7,10 @@ import CountdownTimer from "./CountdownTimer";
 import StepIndicator from "./StepIndicator";
 import GuidancePanel from "./GuidancePanel";
 import SuccessAlert from "./SuccessAlert";
-import { Clock } from "lucide-react";
+import { Clock, Play, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { Progress } from "./ui/progress";
 
 const HandWashingApp = () => {
   const {
@@ -47,16 +49,47 @@ const HandWashingApp = () => {
         </div>
       </header>
       
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left & Center - Camera Feed & Controls */}
           <div className="lg:col-span-2">
-            <div className="mb-6 bg-muted/30 rounded-lg overflow-hidden">
+            <div className="mb-6 bg-muted/30 rounded-lg overflow-hidden shadow-md">
               <CameraFeed isRunning={isRunning} isCompleted={isCompleted} />
+              
+              {/* Control button positioned directly below camera */}
+              <div className="flex justify-center -mt-2 mb-6">
+                {!isRunning && !isCompleted ? (
+                  <Button
+                    onClick={startProcess}
+                    size="lg" 
+                    className="px-8 py-6 text-base font-medium transition-all duration-300 transform hover:scale-105 shadow-md"
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    Iniciar proceso de lavado
+                  </Button>
+                ) : isCompleted ? (
+                  <Button
+                    onClick={resetProcess}
+                    variant="outline"
+                    size="lg"
+                    className="px-8 py-6 text-base font-medium border-success text-success hover:bg-success/10 transition-all duration-300"
+                  >
+                    <RotateCcw className="mr-2 h-5 w-5" />
+                    Comenzar de nuevo
+                  </Button>
+                ) : (
+                  <div className="px-8 py-4 glass-panel animate-pulse">
+                    <p className="text-primary font-medium flex items-center">
+                      <span className="inline-block w-3 h-3 bg-primary rounded-full mr-2"></span>
+                      Proceso en curso...
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
             
-            <div className="bg-primary text-white px-4 py-3 rounded-lg mb-4">
+            <div className="bg-primary text-white px-4 py-3 rounded-lg mb-6">
               <h3 className="font-semibold">Detección de Lavado de Manos</h3>
               <p className="text-sm">Posicione sus manos dentro de la vista de la cámara para una detección adecuada</p>
             </div>
@@ -70,6 +103,11 @@ const HandWashingApp = () => {
                   {Math.floor(timeRemaining / 60)}:{Math.floor(timeRemaining % 60).toString().padStart(2, '0')}
                 </span>
               </div>
+            </div>
+            
+            {/* Overall progress bar */}
+            <div className="mb-6">
+              <Progress value={overallProgress} className="h-2" />
             </div>
             
             {/* Step indicators in a row */}
@@ -97,28 +135,6 @@ const HandWashingApp = () => {
                   </div>
                 );
               })}
-            </div>
-            
-            <div className="flex justify-center mb-8">
-              {!isRunning && !isCompleted ? (
-                <button
-                  onClick={startProcess}
-                  className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors font-medium"
-                >
-                  Iniciar proceso de lavado
-                </button>
-              ) : isCompleted ? (
-                <button
-                  onClick={resetProcess}
-                  className="px-6 py-3 bg-success text-white rounded-md hover:bg-success/90 transition-colors font-medium"
-                >
-                  Comenzar de nuevo
-                </button>
-              ) : (
-                <div className="px-6 py-3 glass-panel">
-                  <p className="text-primary font-medium">Proceso en curso...</p>
-                </div>
-              )}
             </div>
           </div>
           

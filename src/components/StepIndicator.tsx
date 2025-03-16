@@ -56,12 +56,11 @@ const StepIndicator = ({
       }
     >
       <div className="relative">
-        <svg width="72" height="72" viewBox="0 0 100 100">
+        <svg width="80" height="80" viewBox="0 0 100 100" className="drop-shadow-md">
           {/* Background circle */}
           <circle 
             className={cn(
-              "step-circle-bg",
-              status === STEP_STATUS.COMPLETED && "stroke-step-completed"
+              "fill-white stroke-gray-200 stroke-[6]"
             )}
             cx="50" 
             cy="50" 
@@ -71,19 +70,21 @@ const StepIndicator = ({
           {/* Progress circle */}
           <circle 
             className={cn(
-              "progress-circle",
+              "fill-transparent transition-all duration-300 stroke-[6]",
               status === STEP_STATUS.ACTIVE && "stroke-step-active",
-              status === STEP_STATUS.COMPLETED && "stroke-step-completed"
+              status === STEP_STATUS.COMPLETED && "stroke-step-completed",
+              status === STEP_STATUS.PENDING && "stroke-gray-300"
             )}
             cx="50" 
             cy="50" 
             r={radius}
+            strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress / 100)}
             style={{
-              "--initial-offset": `${circumference}`,
-              "--target-offset": `${circumference * (1 - progress / 100)}`,
-            } as React.CSSProperties}
+              transform: "rotate(-90deg)",
+              transformOrigin: "center",
+            }}
           />
         </svg>
         
@@ -91,10 +92,10 @@ const StepIndicator = ({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Icon 
             className={cn(
-              "w-6 h-6",
+              "w-7 h-7",
               status === STEP_STATUS.ACTIVE && "text-step-active",
               status === STEP_STATUS.COMPLETED && "text-step-completed",
-              status === STEP_STATUS.PENDING && "text-step-pending"
+              status === STEP_STATUS.PENDING && "text-gray-400"
             )}
           />
         </div>

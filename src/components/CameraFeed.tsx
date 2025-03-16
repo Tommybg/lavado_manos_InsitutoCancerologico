@@ -3,6 +3,7 @@ import React from "react";
 import { useCamera } from "@/hooks/useCamera";
 import { cn } from "@/lib/utils";
 import { Camera, AlertCircle } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface CameraFeedProps {
   isRunning: boolean;
@@ -31,12 +32,12 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-center p-8">
           <Camera className="w-16 h-16 text-gray-400 mb-4" />
           <p className="text-red-500 mb-4">No se pudo acceder a la cámara. Asegúrese de que los permisos de la cámara estén concedidos.</p>
-          <button 
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+          <Button 
+            variant="default"
             onClick={() => startCamera()}
           >
             Reintentar Acceso a la Cámara
-          </button>
+          </Button>
         </div>
       )}
       
