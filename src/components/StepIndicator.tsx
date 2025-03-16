@@ -56,7 +56,7 @@ const StepIndicator = ({
       }
     >
       <div className="relative">
-        <svg width="80" height="80" viewBox="0 0 100 100" className="drop-shadow-md">
+        <svg width="70" height="70" viewBox="0 0 100 100" className="drop-shadow-md">
           {/* Background circle */}
           <circle 
             className={cn(
@@ -92,7 +92,7 @@ const StepIndicator = ({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <Icon 
             className={cn(
-              "w-7 h-7",
+              "w-6 h-6",
               status === STEP_STATUS.ACTIVE && "text-step-active",
               status === STEP_STATUS.COMPLETED && "text-step-completed",
               status === STEP_STATUS.PENDING && "text-gray-400"

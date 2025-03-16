@@ -18,7 +18,7 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
   }, [startCamera]);
   
   return (
-    <div className="relative w-full mx-auto aspect-video overflow-hidden rounded-lg">
+    <div className="relative w-full mx-auto aspect-video overflow-hidden rounded-t-lg">
       <div 
         className={cn(
           "absolute inset-0 bg-gradient-to-t from-black/20 to-transparent",
@@ -29,9 +29,9 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
       
       {/* Camera access error - similar to the image */}
       {isError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-center p-8">
-          <Camera className="w-16 h-16 text-gray-400 mb-4" />
-          <p className="text-red-500 mb-4">No se pudo acceder a la cámara. Asegúrese de que los permisos de la cámara estén concedidos.</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-center p-6">
+          <Camera className="w-12 h-12 text-gray-400 mb-4" />
+          <p className="text-red-500 mb-4 text-sm">No se pudo acceder a la cámara. Asegúrese de que los permisos de la cámara estén concedidos.</p>
           <Button 
             variant="default"
             onClick={() => startCamera()}
@@ -44,18 +44,18 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
       {status === "requesting" && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
           <div className="text-center">
-            <div className="animate-pulse w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Camera className="w-8 h-8 text-primary" />
+            <div className="animate-pulse w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Camera className="w-6 h-6 text-primary" />
             </div>
-            <p className="text-lg font-medium">Accediendo a la cámara...</p>
+            <p className="text-base font-medium">Accediendo a la cámara...</p>
           </div>
         </div>
       )}
       
       {isCompleted && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="glass-panel bg-white/40 backdrop-blur px-8 py-4 rounded-xl animate-fade-in">
-            <h2 className="text-3xl font-bold text-success">Lavado de manos exitoso</h2>
+          <div className="glass-panel bg-white/40 backdrop-blur px-6 py-3 rounded-xl animate-fade-in">
+            <h2 className="text-2xl font-bold text-success">Lavado de manos exitoso</h2>
           </div>
         </div>
       )}
