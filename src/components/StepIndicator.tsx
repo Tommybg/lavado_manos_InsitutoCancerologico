@@ -12,6 +12,7 @@ interface StepIndicatorProps {
   progress: number;
   position: number;
   totalSteps: number;
+  rowLayout?: boolean;
 }
 
 const StepIndicator = ({ 
@@ -21,12 +22,13 @@ const StepIndicator = ({
   status, 
   progress, 
   position, 
-  totalSteps 
+  totalSteps,
+  rowLayout = false 
 }: StepIndicatorProps) => {
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
   
-  // Calculate position in semicircle
+  // Calculate position in semicircle if not in row layout
   const angle = (Math.PI / (totalSteps - 1)) * position;
   const centerX = 50; // percent
   const centerY = 85; // percent
@@ -38,21 +40,29 @@ const StepIndicator = ({
   return (
     <div 
       className={cn(
-        "step-indicator absolute transition-all duration-300",
+        "step-indicator transition-all duration-300",
         status === STEP_STATUS.ACTIVE && "scale-110 z-10",
-        status === STEP_STATUS.COMPLETED && "scale-105"
+        status === STEP_STATUS.COMPLETED && "scale-105",
+        rowLayout ? "relative" : "absolute"
       )}
-      style={{
-        left: `${x}%`,
-        top: `${y}%`,
-        transform: "translate(-50%, -50%)",
-      }}
+      style={
+        rowLayout 
+          ? undefined 
+          : {
+              left: `${x}%`,
+              top: `${y}%`,
+              transform: "translate(-50%, -50%)",
+            }
+      }
     >
       <div className="relative">
-        <svg width="100" height="100" viewBox="0 0 100 100">
+        <svg width="72" height="72" viewBox="0 0 100 100">
           {/* Background circle */}
           <circle 
-            className="step-circle-bg"
+            className={cn(
+              "step-circle-bg",
+              status === STEP_STATUS.COMPLETED && "stroke-step-completed"
+            )}
             cx="50" 
             cy="50" 
             r={radius}
@@ -77,39 +87,17 @@ const StepIndicator = ({
           />
         </svg>
         
-        {/* Step number and icon */}
+        {/* Step icon */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div 
-            className={cn(
-              "text-xl font-semibold mb-1",
-              status === STEP_STATUS.ACTIVE && "text-step-active",
-              status === STEP_STATUS.COMPLETED && "text-step-completed",
-              status === STEP_STATUS.PENDING && "text-step-pending"
-            )}
-          >
-            {step}
-          </div>
           <Icon 
             className={cn(
-              "w-5 h-5",
+              "w-6 h-6",
               status === STEP_STATUS.ACTIVE && "text-step-active",
               status === STEP_STATUS.COMPLETED && "text-step-completed",
               status === STEP_STATUS.PENDING && "text-step-pending"
             )}
           />
         </div>
-      </div>
-      
-      {/* Step label below */}
-      <div 
-        className={cn(
-          "absolute top-full mt-2 text-sm font-medium text-center w-24 -translate-x-1/2 left-1/2",
-          status === STEP_STATUS.ACTIVE && "text-primary font-semibold",
-          status === STEP_STATUS.COMPLETED && "text-step-completed",
-          status === STEP_STATUS.PENDING && "text-muted-foreground"
-        )}
-      >
-        {label}
       </div>
     </div>
   );

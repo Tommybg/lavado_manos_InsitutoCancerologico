@@ -3,6 +3,7 @@ import React from "react";
 import { WashingStep } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { CheckCircle, Info } from "lucide-react";
 
 interface GuidancePanelProps {
   currentStep: WashingStep | undefined;
@@ -17,72 +18,88 @@ const GuidancePanel = ({
   isCompleted,
   overallProgress,
 }: GuidancePanelProps) => {
-  const Icon = currentStep?.icon;
-  
   return (
-    <div className="glass-panel p-6 w-full max-w-lg mx-auto">
-      <div className="mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-1">Progreso total</h3>
-        <Progress value={overallProgress} className="h-2" />
-      </div>
-      
-      <div 
-        className={cn(
-          "border rounded-xl p-4 transition-all duration-300",
-          isRunning && !isCompleted 
-            ? "border-primary bg-primary/5" 
-            : "border-muted bg-muted/10",
-          isCompleted && "border-success bg-success/5"
-        )}
-      >
-        <div className="flex items-center mb-3">
-          {Icon && (
-            <div 
-              className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center mr-3",
-                isRunning && !isCompleted ? "bg-primary/10 text-primary" : "bg-muted/20 text-muted-foreground",
-                isCompleted && "bg-success/10 text-success"
-              )}
-            >
-              <Icon className="w-5 h-5" />
+    <div className="space-y-6">
+      {/* Current Step Guide Box */}
+      <div className="bg-[#0EA5E9] text-white rounded-t-lg">
+        <div className="px-4 py-3 border-b border-white/20">
+          <h2 className="font-semibold">Guía del Paso Actual</h2>
+        </div>
+        
+        <div className="p-4 bg-white text-foreground rounded-b-lg">
+          <h3 className="font-bold text-lg mb-2">
+            {isCompleted 
+              ? "¡Lavado completado!" 
+              : currentStep 
+                ? `${currentStep.id}. ${currentStep.name}` 
+                : "Preparado para iniciar"}
+          </h3>
+          
+          {currentStep && (
+            <div className="bg-gray-100 p-2 rounded-md mb-4 aspect-video flex items-center justify-center">
+              <div className="text-gray-400 text-center">
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-gray-400">▶</span>
+                </div>
+                <span className="text-xs">Demonstración del paso</span>
+              </div>
             </div>
           )}
           
-          <div>
-            <h3 
-              className={cn(
-                "font-semibold text-lg",
-                isRunning && !isCompleted ? "text-primary" : "text-foreground",
-                isCompleted && "text-success"
-              )}
-            >
-              {isCompleted 
-                ? "Proceso completado" 
-                : currentStep 
-                  ? `Paso ${currentStep.id}: ${currentStep.name}` 
-                  : "Preparado para iniciar"}
-            </h3>
-          </div>
+          <p className="text-gray-600 mb-4">
+            {isCompleted 
+              ? "¡Felicidades! Has completado correctamente todos los pasos del lavado de manos."
+              : currentStep 
+                ? currentStep.description 
+                : "Siga las instrucciones para completar el lavado de manos según el protocolo de la OMS."}
+          </p>
+          
+          {currentStep && !isCompleted && (
+            <div className="mt-3 border-t border-gray-200 pt-3">
+              <h4 className="font-semibold text-sm text-gray-700">Técnica:</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                {currentStep.technique || "Asegúrese de aplicar suficiente jabón para cubrir todas las superficies de las manos."}
+              </p>
+            </div>
+          )}
         </div>
-        
-        <p className="text-muted-foreground">
-          {isCompleted 
-            ? "¡Felicidades! Has completado correctamente todos los pasos del lavado de manos." 
-            : currentStep 
-              ? currentStep.description 
-              : "Siga las instrucciones para completar el lavado de manos según el protocolo de la OMS."}
-        </p>
       </div>
       
-      <div className="mt-6 bg-muted/20 rounded-lg p-4">
-        <h4 className="font-medium mb-2">Consejos para un lavado eficaz:</h4>
-        <ul className="text-sm text-muted-foreground space-y-1">
-          <li>• Utilice agua tibia y jabón suficiente</li>
-          <li>• Complete todos los pasos durante 60 segundos</li>
-          <li>• Preste especial atención a las áreas entre los dedos</li>
-          <li>• No olvide limpiar debajo de las uñas</li>
-          <li>• Seque sus manos con una toalla limpia o papel desechable</li>
-        </ul>
+      {/* Health Tips Box */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="flex items-center px-4 py-3 border-b border-gray-200">
+          <Info className="text-[#0EA5E9] w-5 h-5 mr-2" />
+          <h3 className="font-semibold">Consejos Sanitarios</h3>
+        </div>
+        
+        <div className="p-4">
+          <ul className="space-y-3">
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Use jabón y agua tibia para una limpieza efectiva</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">El lavado de manos debe durar al menos 60 segundos</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">No olvide sus pulgares, a menudo se pasan por alto</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Limpie bien entre los dedos</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Seque las manos completamente para evitar el crecimiento bacteriano</span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle className="text-[#0EA5E9] w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Cierre los grifos con toallas de papel para evitar la recontaminación</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

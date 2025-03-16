@@ -26,7 +26,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#0EA5E9", // Matching the image blue
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -68,9 +68,9 @@ export default {
           foreground: "#FFFFFF",
         },
         step: {
-          active: "#33C3F0",
-          completed: "#4CAF50",
-          pending: "#E0E0E0",
+          active: "#33C3F0", // Light blue for active steps
+          completed: "#4CAF50", // Green for completed steps
+          pending: "#E0E0E0", // Light gray for pending steps
         },
       },
       borderRadius: {

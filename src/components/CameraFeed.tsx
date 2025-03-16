@@ -17,7 +17,7 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
   }, [startCamera]);
   
   return (
-    <div className="relative w-full max-w-2xl mx-auto aspect-video overflow-hidden rounded-2xl shadow-lg">
+    <div className="relative w-full mx-auto aspect-video overflow-hidden rounded-lg">
       <div 
         className={cn(
           "absolute inset-0 bg-gradient-to-t from-black/20 to-transparent",
@@ -26,6 +26,20 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
         )}
       />
       
+      {/* Camera access error - similar to the image */}
+      {isError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-center p-8">
+          <Camera className="w-16 h-16 text-gray-400 mb-4" />
+          <p className="text-red-500 mb-4">No se pudo acceder a la cámara. Asegúrese de que los permisos de la cámara estén concedidos.</p>
+          <button 
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            onClick={() => startCamera()}
+          >
+            Reintentar Acceso a la Cámara
+          </button>
+        </div>
+      )}
+      
       {status === "requesting" && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
           <div className="text-center">
@@ -33,22 +47,6 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
               <Camera className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-medium">Accediendo a la cámara...</p>
-          </div>
-        </div>
-      )}
-      
-      {isError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-destructive/10 backdrop-blur-sm">
-          <div className="text-center p-8 glass-panel">
-            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">Error de cámara</h3>
-            <p className="mb-4">No se pudo acceder a la cámara. Por favor, verifique los permisos del navegador.</p>
-            <button 
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              onClick={() => startCamera()}
-            >
-              Reintentar
-            </button>
           </div>
         </div>
       )}
@@ -66,7 +64,7 @@ const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
         className={cn(
           "absolute inset-0 pointer-events-none transition-opacity duration-500",
           isRunning ? "opacity-100" : "opacity-0",
-          "ring-4 ring-primary/30 rounded-2xl"
+          "ring-2 ring-primary rounded-lg"
         )}
       />
       
