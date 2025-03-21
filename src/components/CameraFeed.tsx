@@ -1,81 +1,103 @@
 
-import React from "react";
-import { useCamera } from "@/hooks/useCamera";
-import { cn } from "@/lib/utils";
-import { Camera, AlertCircle } from "lucide-react";
-import { Button } from "./ui/button";
+import React, { useState, useEffect } from "react";
+import { useCamera } from "../hooks/useCamera";
+import { Play } from "lucide-react";
 
 interface CameraFeedProps {
-  isRunning: boolean;
-  isCompleted: boolean;
+  isActive: boolean;
+  onStart: () => void;
+  showSuccess: boolean;
 }
 
-const CameraFeed = ({ isRunning, isCompleted }: CameraFeedProps) => {
-  const { videoRef, status, startCamera, isError } = useCamera();
-  
-  React.useEffect(() => {
-    startCamera();
-  }, [startCamera]);
-  
+const CameraFeed: React.FC<CameraFeedProps> = ({ isActive, onStart, showSuccess }) => {
+  const { videoRef, isLoading, error } = useCamera();
+  const [cameraReady, setCameraReady] = useState(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.onloadedmetadata = () => {
+        setCameraReady(true);
+      };
+    }
+  }, [videoRef]);
+
   return (
-    <div className="relative w-full mx-auto aspect-video overflow-hidden rounded-t-lg">
-      <div 
-        className={cn(
-          "absolute inset-0 bg-gradient-to-t from-black/20 to-transparent",
-          isRunning && "opacity-50",
-          !isRunning && "opacity-30"
-        )}
-      />
-      
-      {/* Camera access error - similar to the image */}
-      {isError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-center p-6">
-          <Camera className="w-12 h-12 text-gray-400 mb-4" />
-          <p className="text-red-500 mb-4 text-sm">No se pudo acceder a la cámara. Asegúrese de que los permisos de la cámara estén concedidos.</p>
-          <Button 
-            variant="default"
-            onClick={() => startCamera()}
-          >
-            Reintentar Acceso a la Cámara
-          </Button>
+    <div className="camera-container relative w-full h-[200px] md:h-[390px] rounded-xl flex flex-col items-center justify-center transition-all duration-300 bg-gray-100">
+      {isLoading ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl animate-pulse-opacity">
+          <span className="text-gray-500">Cargando cámara...</span>
         </div>
-      )}
-      
-      {status === "requesting" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
-          <div className="text-center">
-            <div className="animate-pulse w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Camera className="w-6 h-6 text-primary" />
+      ) : error ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 rounded-xl p-4">
+          <div className="text-red-500 mb-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </div>
+          <p className="text-center text-gray-700 font-medium">
+            No se pudo acceder a la cámara. Por favor, compruebe los permisos.
+          </p>
+        </div>
+      ) : (
+        <>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`w-full h-full object-cover rounded-xl ${isActive ? 'border-4 border-blue-500' : 'border-4 border-gray-200'}`}
+          />
+          
+          {!isActive && cameraReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-xl">
+              <button
+                onClick={onStart}
+                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center px-5 py-3 rounded-full transition-all transform hover:scale-105 shadow-lg animate-fade-in"
+              >
+                <Play className="mr-2" size={20} />
+                <span className="font-medium">Iniciar proceso de lavado</span>
+              </button>
             </div>
-            <p className="text-base font-medium">Accediendo a la cámara...</p>
-          </div>
-        </div>
+          )}
+          
+          {showSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-xl animate-success-opacity">
+              <div className="bg-white/80 backdrop-blur-md px-8 py-6 rounded-xl shadow-lg text-center transform transition-all">
+                <div className="text-green-500 mb-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mx-auto"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">Lavado de manos exitoso</h3>
+                <p className="text-gray-600">Has completado correctamente todos los pasos</p>
+              </div>
+            </div>
+          )}
+        </>
       )}
-      
-      {isCompleted && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="glass-panel bg-white/40 backdrop-blur px-6 py-3 rounded-xl animate-fade-in">
-            <h2 className="text-2xl font-bold text-success">Lavado de manos exitoso</h2>
-          </div>
-        </div>
-      )}
-      
-      {/* Border glow when active */}
-      <div 
-        className={cn(
-          "absolute inset-0 pointer-events-none transition-opacity duration-500",
-          isRunning ? "opacity-100" : "opacity-0",
-          "ring-2 ring-primary rounded-lg"
-        )}
-      />
-      
-      <video
-        ref={videoRef}
-        className="w-full h-full object-cover bg-gray-900"
-        autoPlay
-        muted
-        playsInline
-      />
     </div>
   );
 };
