@@ -33,7 +33,6 @@ const Header: React.FC = () => {
           <div className="bg-blue-100 text-blue-800 rounded-md px-2 py-1 text-sm font-medium">
             PH
           </div>
-          <span className="text-xs text-gray-500">Sistema de Cumplimiento de Higiene</span>
         </div>
       </div>
     </header>

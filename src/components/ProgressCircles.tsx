@@ -1,8 +1,7 @@
-
 import React from "react";
 import { handwashingSteps, HandwashingStep } from "../utils/handwashingSteps";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import { Play, Circle } from "lucide-react";
 
 interface ProgressCirclesProps {
   currentStep: number;
@@ -75,9 +74,6 @@ const ProgressCircles: React.FC<ProgressCirclesProps> = ({
       </div>
       
       <div className="relative flex flex-col space-y-4 justify-center items-center">
-        {/* Linear progress line */}
-        <div className="w-full h-2 bg-gray-200 rounded-full absolute top-14 -z-10"></div>
-        
         {/* Step items displayed in a line */}
         <div className="flex justify-between w-full">
           {handwashingSteps.map((step) => {
@@ -104,10 +100,8 @@ const ProgressCircles: React.FC<ProgressCirclesProps> = ({
                   </div>
                 </div>
                 
-                {/* Progress bar under each step */}
-                <div className="w-full h-1.5 bg-gray-200 mt-2 rounded-full overflow-hidden">
-                  <div className={`h-full bg-blue-500 transition-all duration-300 ${getProgressWidth(status, step.id)}`}></div>
-                </div>
+                {/* Remove the linear progress bar */}
+                {/* You can add a circular progress indicator here if needed */}
               </div>
             );
           })}
