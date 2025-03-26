@@ -27,6 +27,10 @@ const HandWashingApp = () => {
     const [detectedStep, setDetectedStep] = useState(-1);
     const [isCorrectStep, setIsCorrectStep] = useState(false);
     const [timer, setTimer] = useState(TOTAL_DURATION);
+    // New state for processed image and bounding boxes
+    const [processedImage, setProcessedImage] = useState(null);
+    const [boundingBoxes, setBoundingBoxes] = useState([]);
+    const [showProcessedImage, setShowProcessedImage] = useState(false);
     
     // Refs
     const videoRef = useRef(null);
@@ -47,6 +51,17 @@ const HandWashingApp = () => {
         socketRef.current.on('prediction_result', (data) => {
             setDetectedStep(data.step);
             setIsCorrectStep(data.step === currentStep);
+            
+            // Handle processed image with bounding boxes
+            if (data.image) {
+                setProcessedImage(data.image);
+            }
+            
+            // Store bounding boxes data
+            if (data.bounding_boxes) {
+                setBoundingBoxes(data.bounding_boxes);
+                console.log('Bounding boxes:', data.bounding_boxes);
+            }
         });
         
         startCamera();
@@ -250,6 +265,11 @@ const HandWashingApp = () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
     
+    // Toggle between original and processed view
+    const toggleView = () => {
+        setShowProcessedImage(!showProcessedImage);
+    };
+    
     return (
         <div className="container mx-auto p-4 max-w-6xl">
             <h1 className="text-3xl font-bold text-center mb-6">
@@ -263,22 +283,47 @@ const HandWashingApp = () => {
                     <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
                         {/* Video display */}
                         <div className="relative">
-                            <video 
-                                ref={videoRef} 
-                                className="w-full h-auto"
-                                muted
-                                playsInline
-                            ></video>
+                            {/* Show either the camera feed or the processed image based on state */}
+                            {showProcessedImage && processedImage ? (
+                                <img 
+                                    src={processedImage} 
+                                    className="w-full h-auto"
+                                    alt="Processed feed with bounding boxes"
+                                />
+                            ) : (
+                                <video 
+                                    ref={videoRef} 
+                                    className="w-full h-auto"
+                                    muted
+                                    playsInline
+                                ></video>
+                            )}
                             
                             <canvas 
                                 ref={canvasRef} 
                                 className="hidden" // Hidden canvas for processing
                             ></canvas>
                             
+                            {/* Toggle view button */}
+                            <button 
+                                onClick={toggleView}
+                                className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-md text-sm"
+                            >
+                                {showProcessedImage ? "Ver cámara" : "Ver detecciones"}
+                            </button>
+                            
                             {/* Overlay for incorrect step warning */}
                             {streamActive && !isCorrectStep && detectedStep !== -1 && (
                                 <div className="absolute bottom-4 left-0 right-0 mx-auto w-4/5 bg-yellow-500 bg-opacity-80 text-white py-2 px-4 rounded-lg text-center">
                                     <p>Por favor realice el paso {currentStep + 1} correctamente</p>
+                                </div>
+                            )}
+                            
+                            {/* Display current detection information */}
+                            {boundingBoxes.length > 0 && (
+                                <div className="absolute top-16 left-4 bg-black bg-opacity-70 text-white p-2 rounded text-sm">
+                                    <p>Detección: {boundingBoxes.length > 0 ? boundingBoxes[0].label : "Ninguna"}</p>
+                                    <p>Confianza: {boundingBoxes.length > 0 ? `${(boundingBoxes[0].confidence * 100).toFixed(1)}%` : "0%"}</p>
                                 </div>
                             )}
                             
