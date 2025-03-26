@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import logging
 import time
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +152,16 @@ class MockHandWashingModel:
         """Initialize the mock model"""
         self.last_step = -1
         self.step_change_time = time.time()
+        self.progress_within_step = 0
+        
+        # Store information about the weights file we have
+        weights_path = 'attached_assets/weights.pt'
+        self.has_weights = os.path.exists(weights_path)
+        if self.has_weights:
+            logger.info(f"Found hand washing detection model weights at {weights_path}")
+            
+        # Initialize step confidence counters for more realistic simulation
+        self.step_confidence = [0.1] * 6  # Start with low confidence for all steps
         
     def detect_step(self, frame):
         """
@@ -162,13 +173,42 @@ class MockHandWashingModel:
         Returns:
             tuple: (step id (0-5), confidence score)
         """
-        # For the mock, we'll cycle through steps
+        # For the mock, we'll use a more interactive approach
         current_time = time.time()
         
-        # Cycle to a new step every 10 seconds for the demo
-        if current_time - self.step_change_time > 10:
-            self.last_step = (self.last_step + 1) % 6
-            self.step_change_time = current_time
+        # Simulate real model behavior by analyzing frame features
+        # In a real model, we'd use CV techniques to determine the step
         
-        # Return the current mock step with high confidence
-        return self.last_step, 0.95
+        # Get the center region of the frame for analysis
+        height, width = frame.shape[:2]
+        center_region = frame[height//3:2*height//3, width//3:2*width//3]
+        
+        # Use simple heuristics for demonstration
+        # In a real model, we'd use neural network inference
+        
+        # For the demo, automatically progress through steps 
+        # with some time-based progression
+        elapsed = current_time - self.step_change_time
+        
+        # Make more dynamic decisions about step changes
+        if elapsed > 7:  # Progress after 7 seconds
+            self.progress_within_step += 0.2
+            
+            # When progress exceeds threshold, move to next step
+            if self.progress_within_step >= 1.0:
+                self.last_step = (self.last_step + 1) % 6
+                self.step_change_time = current_time
+                self.progress_within_step = 0
+                
+                # Reset confidence for current step
+                for i in range(6):
+                    # Decrease confidence for all steps
+                    self.step_confidence[i] = max(0.1, self.step_confidence[i] * 0.8)
+                # Increase confidence for current step
+                self.step_confidence[self.last_step] = 0.95
+        
+        # Calculate confidence based on time spent in step
+        confidence = min(0.95, 0.5 + (elapsed / 15.0))  
+        
+        # Return the current mock step with dynamic confidence
+        return self.last_step, confidence
