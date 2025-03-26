@@ -8,8 +8,12 @@ import base64
 from io import BytesIO
 from PIL import Image
 
-# Load the model
-model = torch.load('weights.pt', map_location=torch.device('cpu'))
+# Import necessary modules for model reconstruction
+from ultralytics import YOLO
+
+# Load full model directly from .pt file
+model = YOLO("weights.pt")
+model.fuse()
 model.eval()
 
 # Class names for hand washing steps
@@ -47,22 +51,25 @@ def process_frame(frame_data):
         return None
 
 async def handle_websocket(websocket, path):
+    origin = websocket.request_headers.get("Origin")
+    print(f"Connection from origin: {origin}")
+
     try:
         async for message in websocket:
             data = json.loads(message)
             frame_data = data.get('frame')
-            
+
             if frame_data:
                 # Process the frame and get predictions
                 predicted_step = process_frame(frame_data)
-                
+
                 if predicted_step:
                     # Send back the prediction
                     await websocket.send(json.dumps({
                         'step': predicted_step
                     }))
     except websockets.exceptions.ConnectionClosed:
-        pass
+        print("WebSocket connection closed.")
     except Exception as e:
         print(f"Error in websocket handler: {e}")
 

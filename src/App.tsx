@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, RotateCcw } from 'lucide-react';
-import io from 'socket.io-client';
 
 // Types for our steps
 interface Step {
@@ -19,7 +18,7 @@ function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const socketRef = useRef<any>(null);
+  const socketRef = useRef<WebSocket | null>(null);
   const [predictionResult, setPredictionResult] = useState<string | null>(null);
 
   // Define the washing steps
@@ -34,20 +33,31 @@ function App() {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    socketRef.current = io('http://localhost:8000');
+    const socket = new WebSocket('ws://localhost:8000');
+    socketRef.current = socket;
 
-    socketRef.current.on('prediction', (data: any) => {
+    socket.onopen = () => {
+      console.log("✅ WebSocket conectado");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
       setPredictionResult(data.step);
       if (data.step === steps[currentStep].name) {
-        // Update progress when the correct step is detected
         updateProgress();
       }
-    });
+    };
+
+    socket.onerror = (error) => {
+      console.error("❌ WebSocket error:", error);
+    };
+
+    socket.onclose = () => {
+      console.log("🔌 WebSocket cerrado");
+    };
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+      socket.close();
     };
   }, [currentStep]);
 
@@ -61,7 +71,7 @@ function App() {
         
         // Get the frame data and send it to the server
         const frameData = canvasRef.current.toDataURL('image/jpeg');
-        socketRef.current?.emit('frame', { frame: frameData });
+        socketRef.current?.send(JSON.stringify({ frame: frameData }));
       }
       
       // Process the next frame
