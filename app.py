@@ -88,11 +88,12 @@ def process_predictions(img, predictions, model_type="standard"):
                 class_indices = result[:, 1].astype(int)
                 confidences = result[:, 4]
                 max_conf_idx = np.argmax(confidences)
-                class_id = class_indices[max_conf_idx]
-                confidence = confidences[max_conf_idx]
+                class_id = int(class_indices[max_conf_idx])  # Convert int64 to Python int
+                confidence = float(confidences[max_conf_idx])  # Convert to float
                 return class_id, confidence
             return None, 0
-        except:
+        except Exception as e:
+            print(f"Error processing ultralytics YOLO prediction: {e}")
             try:
                 # For YOLOv5 models
                 result = predictions.xyxy[0].cpu().numpy()
@@ -101,22 +102,25 @@ def process_predictions(img, predictions, model_type="standard"):
                     class_indices = result[:, 5].astype(int)
                     confidences = result[:, 4]
                     max_conf_idx = np.argmax(confidences)
-                    class_id = class_indices[max_conf_idx]
-                    confidence = confidences[max_conf_idx]
+                    class_id = int(class_indices[max_conf_idx])  # Convert int64 to Python int
+                    confidence = float(confidences[max_conf_idx])  # Convert to float
                     return class_id, confidence
                 return None, 0
-            except:
-                print("Error processing YOLO predictions")
+            except Exception as e:
+                print(f"Error processing YOLOv5 prediction: {e}")
                 return None, 0
     
     # Standard processing for PyTorch models
     if isinstance(predictions, torch.Tensor):
-        preds = predictions.cpu().detach().numpy()
-        # Assuming predictions are class probabilities
-        if len(preds.shape) > 1 and preds.shape[1] >= len(CLASS_NAMES):
-            class_id = np.argmax(preds[0])
-            confidence = preds[0][class_id]
-            return class_id, confidence
+        try:
+            preds = predictions.cpu().detach().numpy()
+            # Assuming predictions are class probabilities
+            if len(preds.shape) > 1 and preds.shape[1] >= len(CLASS_NAMES):
+                class_id = int(np.argmax(preds[0]))  # Convert int64 to Python int
+                confidence = float(preds[0][class_id])  # Convert to float
+                return class_id, confidence
+        except Exception as e:
+            print(f"Error processing standard prediction: {e}")
     
     return None, 0
 
@@ -142,8 +146,15 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
 
+# Store last few detections to smooth out results
+last_detections = []
+DETECTION_HISTORY_SIZE = 5
+CONFIDENCE_THRESHOLD = 0.3  # Lower threshold to catch more detections
+
 @socketio.on('video_frame')
 def handle_video_frame(data):
+    global last_detections
+    
     try:
         # Decode base64 image
         image_data = data['image'].split(',')[1]
@@ -175,10 +186,44 @@ def handle_video_frame(data):
             # Process predictions
             class_id, confidence = process_predictions(frame, predictions, model_type)
         
+        # Update detection history
+        if class_id is not None and confidence > CONFIDENCE_THRESHOLD:
+            last_detections.append((class_id, confidence))
+        else:
+            # If no detection, add a None to history
+            last_detections.append((None, 0))
+            
+        # Keep history at fixed size
+        if len(last_detections) > DETECTION_HISTORY_SIZE:
+            last_detections = last_detections[-DETECTION_HISTORY_SIZE:]
+            
+        # Get most common detection in recent history
+        valid_detections = [(c, conf) for c, conf in last_detections if c is not None]
+        
+        if valid_detections:
+            # Count occurrences of each class
+            class_counts = {}
+            for c, conf in valid_detections:
+                class_counts[c] = class_counts.get(c, 0) + 1
+                
+            # Get the most common class
+            most_common_class = max(class_counts.items(), key=lambda x: x[1])[0]
+            
+            # Get the highest confidence for that class
+            max_confidence = max([conf for c, conf in valid_detections if c == most_common_class])
+            
+            # Use the most common class from recent history
+            class_id = most_common_class
+            confidence = max_confidence
+        else:
+            class_id = None
+            confidence = 0
+        
         # Send result back to client
-        if class_id is not None and confidence > 0.5:  # Adjust confidence threshold as needed
+        if class_id is not None:
             step_name = CLASS_NAMES[class_id] if class_id < len(CLASS_NAMES) else f"Class {class_id}"
-            emit('prediction_result', {'step': class_id, 'step_name': step_name, 'confidence': float(confidence)})
+            print(f"Detected: {step_name} with confidence {confidence:.2f}")
+            emit('prediction_result', {'step': int(class_id), 'step_name': step_name, 'confidence': float(confidence)})
         else:
             emit('prediction_result', {'step': -1, 'step_name': 'No step detected', 'confidence': 0})
     

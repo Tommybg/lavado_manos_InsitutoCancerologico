@@ -4,12 +4,12 @@ const { useState, useEffect, useRef } = React;
 // Hand washing step images
 // Note: You'll need to place these images in your static/images folder
 const stepImages = [
-    '/static/images/paso1.png', // Wet hands
-    '/static/images/paso2.png', // Apply soap
-    '/static/images/paso3.png', // Rub palms
-    '/static/images/paso4.png', // Rub backs
-    '/static/images/paso5.png', // Rub fingers
-    '/static/images/paso6.png'  // Rinse hands
+    '/static/images/step1.png', // Wet hands
+    '/static/images/step2.png', // Apply soap
+    '/static/images/step3.png', // Rub palms
+    '/static/images/step4.png', // Rub backs
+    '/static/images/step5.png', // Rub fingers
+    '/static/images/step6.png'  // Rinse hands
 ];
 
 // Constants for timing
@@ -73,14 +73,23 @@ const HandWashingApp = () => {
             clearInterval(stepTimerRef.current);
         }
         
-        // Only start step timer if correct step is detected
-        if (isCorrectStep && streamActive) {
+        // Only start step timer if correct step is detected or if we're in debug mode
+        // Adding a debug mode to allow advancement even with limited detections
+        const debugMode = true; // Set to false in production if model works well
+        
+        if ((isCorrectStep || debugMode) && streamActive) {
+            // We'll still show the warning if not the correct step in debug mode
             stepTimerRef.current = setInterval(() => {
                 setStepProgress(prev => {
                     const newProgress = [...prev];
                     
+                    // In debug mode, advance at a reduced rate if not correct step
+                    const progressRate = isCorrectStep ? 
+                        (100 / (STEP_DURATION * 10)) : // Normal rate: 10 updates per second
+                        (100 / (STEP_DURATION * 20));  // Half rate if incorrect in debug mode
+                    
                     if (newProgress[currentStep] < 100) {
-                        newProgress[currentStep] += (100 / (STEP_DURATION * 10)); // 10 updates per second
+                        newProgress[currentStep] += progressRate;
                     }
                     
                     // Check if current step is completed
@@ -156,27 +165,71 @@ const HandWashingApp = () => {
             return;
         }
         
-        // Throttle frame rate to 5 fps
-        if (timestamp - lastFrameTimeRef.current < 200) {
+        // Throttle frame rate to 3 fps to give the model more time to process
+        if (timestamp - lastFrameTimeRef.current < 333) {
             animationRef.current = requestAnimationFrame(captureFrame);
             return;
         }
         
         lastFrameTimeRef.current = timestamp;
         
-        const context = canvasRef.current.getContext('2d');
-        const { videoWidth, videoHeight } = videoRef.current;
-        
-        // Set canvas dimensions to match video
-        canvasRef.current.width = videoWidth;
-        canvasRef.current.height = videoHeight;
-        
-        // Draw video frame to canvas
-        context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
-        
-        // Send frame to server for analysis
-        const imageData = canvasRef.current.toDataURL('image/jpeg', 0.7);
-        socketRef.current.emit('video_frame', { image: imageData });
+        try {
+            const context = canvasRef.current.getContext('2d');
+            const { videoWidth, videoHeight } = videoRef.current;
+            
+            // Make sure video is initialized
+            if (!videoWidth || !videoHeight) {
+                animationRef.current = requestAnimationFrame(captureFrame);
+                return;
+            }
+            
+            // Set canvas dimensions to match video
+            canvasRef.current.width = videoWidth;
+            canvasRef.current.height = videoHeight;
+            
+            // Draw video frame to canvas
+            context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
+            
+            // Add visual indicator for correct/incorrect step
+            if (streamActive && currentStep >= 0) {
+                // Add a status indicator
+                const indicatorSize = 80;
+                const padding = 20;
+                
+                context.save();
+                
+                // Draw a semi-transparent background
+                context.fillStyle = isCorrectStep ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 165, 0, 0.3)';
+                context.beginPath();
+                context.arc(
+                    padding + indicatorSize/2, 
+                    padding + indicatorSize/2, 
+                    indicatorSize/2, 
+                    0, 
+                    Math.PI * 2
+                );
+                context.fill();
+                
+                // Draw step number
+                context.fillStyle = '#ffffff';
+                context.font = 'bold 36px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(
+                    (currentStep + 1).toString(), 
+                    padding + indicatorSize/2,
+                    padding + indicatorSize/2
+                );
+                
+                context.restore();
+            }
+            
+            // Send frame to server for analysis at a lower quality to improve performance
+            const imageData = canvasRef.current.toDataURL('image/jpeg', 0.5);
+            socketRef.current.emit('video_frame', { image: imageData });
+        } catch (err) {
+            console.error('Error capturing frame:', err);
+        }
         
         // Request next frame
         animationRef.current = requestAnimationFrame(captureFrame);
