@@ -149,8 +149,8 @@ def handle_disconnect():
 # Store last few detections to smooth out results
 last_detections = []
 DETECTION_HISTORY_SIZE = 5
-CONFIDENCE_THRESHOLD = 0.6  # Lower threshold to catch more detections
- 
+CONFIDENCE_THRESHOLD = 0.3  # Lower threshold to catch more detections
+
 @socketio.on('video_frame')
 def handle_video_frame(data):
     global last_detections
@@ -161,7 +161,7 @@ def handle_video_frame(data):
         image_bytes = base64.b64decode(image_data)
         nparr = np.frombuffer(image_bytes, np.uint8)
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-       
+        
         # Run inference
         if model_type == "yolo":
             # Resize frame for better performance
@@ -175,13 +175,6 @@ def handle_video_frame(data):
            
             # Process predictions
             class_id, confidence = process_predictions(frame, predictions, model_type)
-           
-            # Draw bounding boxes on the frame
-            for box in predictions[0].cpu().boxes.data.numpy():
-                x1, y1, x2, y2, conf, cls = box
-                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-                cv2.putText(frame, f'{CLASS_NAMES[int(cls)]}: {conf:.2f}', (int(x1), int(y1) - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         else:
             # Preprocess the frame
             img_tensor = preprocess_image(frame)
@@ -225,17 +218,25 @@ def handle_video_frame(data):
         else:
             class_id = None
             confidence = 0
-       
+        
         # Send result back to client
         if class_id is not None:
             step_name = CLASS_NAMES[class_id] if class_id < len(CLASS_NAMES) else f"Class {class_id}"
             print(f"Detected: {step_name} with confidence {confidence:.2f}")
-            emit('prediction_result', {'step': int(class_id), 'step_name': step_name, 'confidence': float(confidence)})
+            emit('prediction_result', {
+                'step': int(class_id), 
+                'step_name': step_name, 
+                'confidence': float(confidence),
+                'image': f'data:image/jpeg;base64,{img_base64}',
+                'bounding_boxes': bounding_boxes
+            })
         else:
             emit('prediction_result', {'step': -1, 'step_name': 'No step detected', 'confidence': 0})
-   
+    
     except Exception as e:
         print(f"Error processing frame: {e}")
+        import traceback
+        traceback.print_exc()
         emit('prediction_result', {'step': -1, 'step_name': 'Error', 'confidence': 0})
  
 if __name__ == '__main__':
