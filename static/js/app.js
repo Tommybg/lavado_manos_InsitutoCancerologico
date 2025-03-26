@@ -4,12 +4,12 @@ const { useState, useEffect, useRef } = React;
 // Hand washing step images
 // Note: You'll need to place these images in your static/images folder
 const stepImages = [
-    '/static/images/step1.png', // Wet hands
-    '/static/images/step2.png', // Apply soap
-    '/static/images/step3.png', // Rub palms
-    '/static/images/step4.png', // Rub backs
-    '/static/images/step5.png', // Rub fingers
-    '/static/images/step6.png'  // Rinse hands
+    '/static/images/paso1.png', // Wet hands
+    '/static/images/paso2.png', // Apply soap
+    '/static/images/paso3.png', // Rub palms
+    '/static/images/paso4.png', // Rub backs
+    '/static/images/paso5.png', // Rub fingers
+    '/static/images/paso6.png'  // Rinse hands
 ];
 
 // Constants for timing
