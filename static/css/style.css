@@ -1,0 +1,173 @@
+/* Main Styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+}
+
+/* Camera Container Styles */
+#camera-container {
+    min-height: 400px;
+    position: relative;
+}
+
+#camera-feed img {
+    max-width: 100%;
+    max-height: 380px;
+    border: 2px solid #e9ecef;
+}
+
+/* Progress Bar and Timer */
+.progress {
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.progress-circle-container {
+    display: inline-block;
+    position: relative;
+}
+
+.progress-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #f3f3f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 10px solid #e9ecef;
+}
+
+.progress-circle::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 10px solid transparent;
+    border-top-color: #28a745;
+    border-right-color: #28a745;
+    transform: rotate(0deg);
+    transition: transform 0.5s ease;
+}
+
+.progress-circle span {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Hand Washing Steps Styles */
+.hand-washing-steps {
+    margin-top: 20px;
+}
+
+.step-item {
+    text-align: center;
+    width: 120px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.step-item.active {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.step-item.completed {
+    opacity: 1;
+}
+
+.step-icon {
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+}
+
+.step-item.active .step-icon {
+    border-color: #007bff;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+}
+
+.step-item.completed .step-icon {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.step-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Alert Styles */
+.alert-info {
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-success {
+    border-left: 4px solid #28a745;
+}
+
+.alert-warning {
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    border-left: 4px solid #dc3545;
+}
+
+/* Animation for step transition */
+@keyframes highlight {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.step-highlight {
+    animation: highlight 1s ease;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .step-item {
+        width: 100px;
+    }
+    
+    .step-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .step-text {
+        font-size: 0.75rem;
+    }
+    
+    .progress-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .progress-circle::before {
+        width: 80px;
+        height: 80px;
+    }
+}

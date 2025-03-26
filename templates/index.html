@@ -1,0 +1,205 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Column - Webcam and Instructions -->
+    <div class="col-md-8">
+        <!-- Camera Section -->
+        <div class="card mb-4">
+            <div class="card-body" id="camera-container">
+                <div id="no-camera" class="text-center p-5" style="display: none;">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                        <h4>No se encontró ninguna cámara en su dispositivo.</h4>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Cómo habilitar la cámara:</h5>
+                        <ol class="text-start">
+                            <li>Haga clic en el icono de cámara en la barra del navegador</li>
+                            <li>Seleccione "Permitir acceso a la cámara"</li>
+                            <li>Actualice la página y presione "Permitir"</li>
+                            <li>Recargue la página</li>
+                        </ol>
+                        <button class="btn btn-primary" id="btn-try-again">
+                            <i class="fas fa-sync-alt me-2"></i> Reintentar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="camera-feed" class="text-center">
+                    <img src="{{ url_for('video_feed') }}" class="img-fluid rounded" alt="Cámara de detección de lavado de manos">
+                    <div class="progress mt-3" id="progress-bar">
+                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hand Washing Detection Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Detección de Lavado de Manos</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="progress-circle-container">
+                        <div class="progress-circle" id="timer-circle">
+                            <span id="timer-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <p>Posicione sus manos dentro de la vista de la cámara para una detección adecuada.</p>
+                
+                <!-- Progress Steps Section -->
+                <h5 class="mt-4">Progreso de Lavado de Manos</h5>
+                <div class="hand-washing-steps mt-3">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <!-- Step 1 -->
+                        <div class="step-item" data-step="1">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step1.svg') }}" alt="Paso 1" class="img-fluid">
+                            </div>
+                            <div class="step-text">1. Palma con palma</div>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div class="step-item" data-step="2">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step2.svg') }}" alt="Paso 2" class="img-fluid">
+                            </div>
+                            <div class="step-text">2. Palma sobre dorso</div>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div class="step-item" data-step="3">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step3.svg') }}" alt="Paso 3" class="img-fluid">
+                            </div>
+                            <div class="step-text">3. Entre los dedos</div>
+                        </div>
+                        
+                        <!-- Step 4 -->
+                        <div class="step-item" data-step="4">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step4.svg') }}" alt="Paso 4" class="img-fluid">
+                            </div>
+                            <div class="step-text">4. El Cepillado</div>
+                        </div>
+                        
+                        <!-- Step 5 -->
+                        <div class="step-item" data-step="5">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step5.svg') }}" alt="Paso 5" class="img-fluid">
+                            </div>
+                            <div class="step-text">5. Pulgares</div>
+                        </div>
+                        
+                        <!-- Step 6 -->
+                        <div class="step-item" data-step="6">
+                            <div class="step-icon">
+                                <img src="{{ url_for('static', filename='svg/step6.svg') }}" alt="Paso 6" class="img-fluid">
+                            </div>
+                            <div class="step-text">6. Uñas y yemas</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="iniciar-lavado" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i> Iniciar Lavado
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Side Column - Instructions and Tips -->
+    <div class="col-md-4">
+        <!-- Instructions Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle text-primary fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Inicie el proceso para ver las instrucciones</h5>
+                    </div>
+                </div>
+                <div id="instructions-content">
+                    <p>Una vez que coloque sus manos frente a la cámara, el sistema detectará automáticamente y le guiará a través de los pasos correctos para un lavado de manos adecuado.</p>
+                    <p>Cada paso debe mantenerse durante 7 segundos para ser efectivo.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Health Tips Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    Consejos Sanitarios
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Cierre los grifos con toallas de papel para evitar la recontaminación.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        El lavado de manos debe durar entre 40 y 60 segundos.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Seque sus manos completamente para evitar el crecimiento bacteriano.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Use agua tibia en lugar de agua caliente para evitar resecar la piel.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Lávese las manos antes y después de atender a cada paciente.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Alert System -->
+        <div id="alert-container" class="mt-4">
+            <!-- Alerts will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Completion -->
+<div class="modal fade" id="completion-modal" tabindex="-1" aria-labelledby="completionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="completionModalLabel">
+                    <i class="fas fa-check-circle me-2"></i> ¡Felicidades!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-hand-sparkles text-success fa-5x mb-3"></i>
+                <h4>Lavado de manos completado correctamente</h4>
+                <p class="mt-3">Ha completado con éxito todos los pasos del protocolo de lavado de manos de la OMS.</p>
+                <p>Tiempo total: <span id="total-time">0</span> segundos</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+<script src="{{ url_for('static', filename='js/handwashing.js') }}"></script>
+{% endblock %}
