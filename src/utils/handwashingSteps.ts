@@ -1,4 +1,3 @@
-
 import { Clock, Check, Info, Play, ArrowDown, ArrowUp } from "lucide-react";
 
 export interface HandwashingStep {
@@ -54,9 +53,9 @@ export const handwashingSteps: HandwashingStep[] = [
   },
   {
     id: 6,
-    name: "Muñecas",
-    description: "Frote las muñecas con movimientos circulares. Enjuague las manos con agua y séquelas con una toalla desechable.",
-    technique: "Frotar muñecas con movimientos circulares.",
+    name: "Uñas en palma",
+    description: "Frotese la punta de los dedos de la mano derecha contra la palma de la mano izquierda, haciendo un movimiento de rotación y viceversa.",
+    technique: "Frotar puntas de los dedos contra la palma con movimientos circulares.",
     image: "paso6.png",
     duration: 10,
   }
