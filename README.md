@@ -9,11 +9,11 @@ python -m venv venv
 2. Activar el entorno virtual
 ```bash
 # En Windows
-.\env\Scripts\activate.bat # Opción para CMD
-.\env\Scripts\activate.ps1 # Opción para PowerShell
+.\venv\Scripts\activate.bat # Opción para CMD
+.\venv\Scripts\activate.ps1 # Opción para PowerShell
 
 # En Linux o Mac
-source env/bin/activate
+source venv/bin/activate
 ```
 
 
