@@ -3,7 +3,7 @@
 ## Pasos para ejecutar el proyecto
 1. Crear un entorno virtual
 ```bash
-python -m venv env
+python -m venv venv
 ```
 
 2. Activar el entorno virtual
