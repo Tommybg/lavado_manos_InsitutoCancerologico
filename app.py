@@ -256,7 +256,11 @@ def handle_video_frame(data):
                 'step_name': step_name,
                 'confidence': float(confidence),
                 'image': f'data:image/jpeg;base64,{img_base64}',
-                'bounding_boxes': bounding_boxes
+                'bounding_boxes': bounding_boxes,
+                'overlay_style': {
+                    'background': 'rgba(40, 167, 69, 0.5)',
+                    'fullscreen': True
+                }
             })
         else:
             emit('prediction_result', {
